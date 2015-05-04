@@ -348,6 +348,22 @@ if(WITH_CUDA)
   include("${PCL_SOURCE_DIR}/cmake/pcl_find_cuda.cmake")
 endif(WITH_CUDA)
 
+# cmake >2.8 for QT allows use explicit link to qtmain.lib
+if(WIN32 AND
+   ((CMAKE_VERSION VERSION_EQUAL "2.8.11") OR
+   (CMAKE_VERSION VERSION_GREATER "2.8.11")))
+  # mainly gets rid of cmake warnings every time qt is used.
+  set(QT_LK_MSG "QT/cmake autolink link to qtmain.lib on windows, see CMP0020.")
+  option(USE_QT_AUTOLINK "${QT_LK_MSG}" FALSE)
+  if(NOT USE_QT_AUTOLINK)
+    cmake_policy(SET CMP0020 OLD)
+    message(STATUS "NOT using ${QT_LK_MSG}")
+  else()
+    cmake_policy(SET CMP0020 NEW)
+    message(STATUS "Will use ${QT_LK_MSG}")
+  endif()
+endif()
+
 option(WITH_QT "Build QT Front-End" TRUE)
 if(WITH_QT)
   # Find Qt4
