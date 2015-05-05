@@ -40,7 +40,8 @@
 #include <cmath>
 
 #include <pcl/io/buffers.h>
-
+#include <boost/type_traits.hpp>
+#include <boost/call_traits.hpp>
 using namespace pcl::io;
 
 template <typename T>
@@ -48,7 +49,6 @@ class BuffersTest : public ::testing::Test
 {
 
   public:
-
     BuffersTest ()
     {
       if (std::numeric_limits<T>::has_quiet_NaN)
@@ -56,6 +56,13 @@ class BuffersTest : public ::testing::Test
       else
         invalid_ = 0;
     }
+    /// Work around for newer msvc compilers.
+    bool _check_isnan(T value, const boost::false_type& ) const
+    {return isnan(value);}
+    bool _check_isnan(T value, const boost::true_type& ) const
+    {return  isnan<float>(static_cast<float>(value));}
+    bool check_isnan(typename boost::call_traits<T>::param_type value)
+    {return _check_isnan(value, boost::is_integral<T>());}
 
     template <typename Buffer> void
     checkBuffer (Buffer& buffer, const T* data, const T* expected, size_t size)
@@ -68,8 +75,8 @@ class BuffersTest : public ::testing::Test
         memcpy (d.data (), dptr, buffer.size () * sizeof (T));
         buffer.push (d);
         for (size_t j = 0; j < buffer.size (); ++j)
-          if (isnan (eptr[j]))
-            EXPECT_TRUE (isnan (buffer[j]));
+          if (check_isnan(eptr[j]))
+            EXPECT_TRUE(check_isnan(buffer[j]));
           else
             EXPECT_EQ (eptr[j], buffer[j]);
         dptr += buffer.size ();
