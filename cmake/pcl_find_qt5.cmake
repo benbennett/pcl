@@ -49,7 +49,6 @@ endforeach()
 # Prepare qt4-style cmake variables and macros.
 if(Qt5Core_FOUND)
 
-    set(QT5_FOUND TRUE CACHE INTERNAL "")
 
     # FIXME: CMake's automoc seems to break macosx parallel builds.
     # set(CMAKE_AUTOMOC ON)
@@ -69,10 +68,15 @@ if(Qt5Core_FOUND)
             qt5_wrap_ui(${ARGN})
         endmacro()
     endif()
-
-    set(QT_USE_FILE ${CMAKE_CURRENT_BINARY_DIR}/use-qt5.cmake CACHE PATH "")
+    set(PCL_QT_USE_FILE "${CMAKE_BINARY_DIR}/use-qt5.cmake")
+    set(QT_USE_FILE "${CMAKE_BINARY_DIR}/use-qt5.cmake" CACHE PATH "")
+    # if you switch between the two versions it will write to wrong location.
+    if(NOT (PCL_QT_USE_FILE STREQUAL QT_USE_FILE))
+        set(QT_USE_FILE "${PCL_QT_USE_FILE}" CACHE PATH "" FORCE)
+    endif()
     file(WRITE ${QT_USE_FILE} "#")
 
+    set(QT5_FOUND TRUE CACHE INTERNAL "")
     # Trick the remainder of the build system.
     set(QT4_FOUND TRUE)
 endif()

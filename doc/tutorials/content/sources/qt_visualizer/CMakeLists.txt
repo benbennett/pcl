@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 
 project      (pcl-visualizer)
-find_package (Qt4 REQUIRED)
+if(NOT QT4_FOUND)
+    find_package (Qt4 REQUIRED)
+endif()
 find_package (VTK REQUIRED)
 find_package (PCL 1.7.1 REQUIRED)
 

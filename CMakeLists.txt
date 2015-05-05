@@ -365,18 +365,27 @@ if(WIN32 AND
 endif()
 
 option(WITH_QT "Build QT Front-End" TRUE)
+set(PCL_QT_VERSION "4" CACHE STRING "Qt version to use.")
+set_property(CACHE PCL_QT_VERSION PROPERTY STRINGS 4 5)
+if(NOT (PCL_QT_VERSION VERSION_EQUAL "4" OR PCL_QT_VERSION VERSION_EQUAL "5"))
+  message(FATAL_ERROR "Value for PCL_QT_VERSION is either '4' or '5'")
+endif()
+
 if(WITH_QT)
   # Find Qt4
-  find_package(Qt4)
-  if (QT4_FOUND)
-    include("${QT_USE_FILE}")
-  endif (QT4_FOUND)
+  if(NOT WITH_QT5)
+    find_package(Qt4)
+    if (QT4_FOUND)
+      include("${QT_USE_FILE}")
+    endif (QT4_FOUND)
+  endif(NOT WITH_QT5)
 
   # Find QT5
-  if(NOT QT4_FOUND)
-      include(cmake/pcl_find_qt5.cmake)
-  endif(NOT QT4_FOUND)
+  if(NOT QT4_FOUND OR WITH_QT5)
+    include(cmake/pcl_find_qt5.cmake)
+  endif(NOT QT4_FOUND OR WITH_QT5)
 endif(WITH_QT)
+
 
 # Find VTK
 option(WITH_VTK "Build VTK-Visualizations" TRUE)
